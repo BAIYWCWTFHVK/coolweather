@@ -4,12 +4,15 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.preference.PreferenceManager;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -30,7 +33,9 @@ import okhttp3.Response;
 
 public class WeatherActivity extends AppCompatActivity {
 
-    private SwipeRefreshLayout refreshLayout;
+    public DrawerLayout drawerLayout;
+    private Button changeCity;
+    public SwipeRefreshLayout refreshLayout;
     private ImageView bingPicImg;
     private ScrollView weatherLayout;
     private TextView titleCity;
@@ -55,7 +60,7 @@ public class WeatherActivity extends AppCompatActivity {
         }
         setContentView(R.layout.activity_weather);
         //初始化各控件
-        refreshLayout= (SwipeRefreshLayout) findViewById(R.id.refresh_weather);
+        refreshLayout = (SwipeRefreshLayout) findViewById(R.id.refresh_weather);
         refreshLayout.setColorSchemeResources(R.color.colorPrimary);
         bingPicImg = (ImageView) findViewById(R.id.bing_pic_img);
         weatherLayout = (ScrollView) findViewById(R.id.weather_layout);
@@ -69,6 +74,14 @@ public class WeatherActivity extends AppCompatActivity {
         comfortText = (TextView) findViewById(R.id.comfort_text);
         carWashText = (TextView) findViewById(R.id.car_wash_text);
         sportText = (TextView) findViewById(R.id.sport_text);
+        changeCity = (Button) findViewById(R.id.change_city_button);
+        drawerLayout= (DrawerLayout) findViewById(R.id.drawer_layout);
+        changeCity.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                drawerLayout.openDrawer(GravityCompat.START);
+            }
+        });
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         String weatherString = prefs.getString("weather", null);
         String bingPic = prefs.getString("bing_pic", null);
@@ -81,7 +94,7 @@ public class WeatherActivity extends AppCompatActivity {
         if (weatherString != null) {
             //有缓存时,直接解析2天气数据
             Weather weather = Utility.handleWeatherResponse(weatherString);
-            weatherId=weather.basic.weatherId;
+            weatherId = weather.basic.weatherId;
             showWeatherInfo(weather);
         } else {
             weatherId = getIntent().getStringExtra("weather_id");
@@ -127,8 +140,8 @@ public class WeatherActivity extends AppCompatActivity {
     }
 
 
-    /*根据id请求城市天气数据并将数据持久化(SharedPreferences)*/
-    private void requestWeather(String weatherId) {
+    /*根据id请求城市天气数据并将数据持久化(SharedPreferences)并显示*/
+    public void requestWeather(String weatherId) {
         String weatherUrl = "http://guolin.tech/api/weather?cityid=" + weatherId
                 + "&key=df43c7a5539f4045be14ef64072e54a6";
         HttpUtil.sendOkHttpRequest(weatherUrl, new Callback() {
